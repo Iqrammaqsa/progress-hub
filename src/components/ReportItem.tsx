@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent } from "react";
+import { ChangeEvent, useRef } from "react";
 import Image from "next/image";
 
 import type { ReportItemData } from "@/types/report";
@@ -22,9 +22,18 @@ export default function ReportItem({
   onRemove,
   canRemove,
 }: ReportItemProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
     onImageChange(item.id, file);
+  };
+
+  const handleUndoImage = () => {
+    onImageChange(item.id, null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -45,11 +54,21 @@ export default function ReportItem({
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">Screenshot</label>
           <input
+            ref={fileInputRef}
             type="file"
             accept="image/*"
             onChange={handleImageChange}
             className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 file:mr-4 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200"
           />
+          {item.imagePreviewUrl ? (
+            <button
+              type="button"
+              onClick={handleUndoImage}
+              className="mt-3 rounded-md border border-amber-300 px-3 py-1 text-xs font-medium text-amber-700 transition hover:bg-amber-50"
+            >
+              Undo Image
+            </button>
+          ) : null}
           {item.imagePreviewUrl ? (
             <Image
               src={item.imagePreviewUrl}
