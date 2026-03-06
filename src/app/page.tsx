@@ -1,65 +1,162 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import ReportForm from "@/components/ReportForm";
+import ReportPreview from "@/components/ReportPreview";
+import { exportReportToDocx } from "@/lib/exportDocx";
+import { exportReportToPdf } from "@/lib/exportPdf";
+import type { ReportItemData } from "@/types/report";
+
+const createItem = (): ReportItemData => ({
+  id:
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`,
+  image: null,
+  imagePreviewUrl: null,
+  description: "",
+});
 
 export default function Home() {
+  const [title, setTitle] = useState("");
+  const [items, setItems] = useState<ReportItemData[]>([createItem()]);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isExportingDocx, setIsExportingDocx] = useState(false);
+  const itemsRef = useRef(items);
+
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
+
+  useEffect(() => {
+    return () => {
+      itemsRef.current.forEach((item) => {
+        if (item.imagePreviewUrl) {
+          URL.revokeObjectURL(item.imagePreviewUrl);
+        }
+      });
+    };
+  }, []);
+
+  const hasExportableContent = useMemo(
+    () => items.some((item) => item.image || item.description.trim()),
+    [items],
+  );
+
+  const handleAddItem = () => {
+    setItems((previous) => [...previous, createItem()]);
+  };
+
+  const handleRemoveItem = (id: string) => {
+    setItems((previous) => {
+      if (previous.length === 1) {
+        return previous;
+      }
+
+      const itemToRemove = previous.find((item) => item.id === id);
+      if (itemToRemove?.imagePreviewUrl) {
+        URL.revokeObjectURL(itemToRemove.imagePreviewUrl);
+      }
+
+      return previous.filter((item) => item.id !== id);
+    });
+  };
+
+  const handleImageChange = (id: string, file: File | null) => {
+    setItems((previous) =>
+      previous.map((item) => {
+        if (item.id !== id) {
+          return item;
+        }
+
+        if (item.imagePreviewUrl) {
+          URL.revokeObjectURL(item.imagePreviewUrl);
+        }
+
+        return {
+          ...item,
+          image: file,
+          imagePreviewUrl: file ? URL.createObjectURL(file) : null,
+        };
+      }),
+    );
+  };
+
+  const handleDescriptionChange = (id: string, description: string) => {
+    setItems((previous) =>
+      previous.map((item) => (item.id === id ? { ...item, description } : item)),
+    );
+  };
+
+  const handleExportPdf = async () => {
+    if (!hasExportableContent) {
+      return;
+    }
+
+    setIsExportingPdf(true);
+    try {
+      await exportReportToPdf(title, items);
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
+  const handleExportDocx = async () => {
+    if (!hasExportableContent) {
+      return;
+    }
+
+    setIsExportingDocx(true);
+    try {
+      await exportReportToDocx(title, items);
+    } finally {
+      setIsExportingDocx(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="mx-auto min-h-screen w-full max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <header>
+        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Progress Hub</h1>
+        <p className="mt-2 text-sm text-slate-600">
+          Buat daily coding report dengan screenshot, preview, dan export ke PDF atau DOCX.
+        </p>
+      </header>
+
+      <ReportForm
+        title={title}
+        items={items}
+        onTitleChange={setTitle}
+        onAddItem={handleAddItem}
+        onRemoveItem={handleRemoveItem}
+        onImageChange={handleImageChange}
+        onDescriptionChange={handleDescriptionChange}
+      />
+
+      <ReportPreview title={title} items={items} />
+
+      <section className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-800">4. Export</h2>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={handleExportPdf}
+            disabled={!hasExportableContent || isExportingPdf}
+            className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {isExportingPdf ? "Exporting PDF..." : "Export PDF"}
+          </button>
+          <button
+            type="button"
+            onClick={handleExportDocx}
+            disabled={!hasExportableContent || isExportingDocx}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Documentation
-          </a>
+            {isExportingDocx ? "Exporting DOCX..." : "Export DOCX"}
+          </button>
         </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }
