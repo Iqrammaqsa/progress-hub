@@ -10,21 +10,23 @@ type ReportPreviewProps = {
 
 export default function ReportPreview({ title, items }: ReportPreviewProps) {
   const hasItems = items.length > 0;
+  const generatedDate = new Date().toLocaleString();
 
   return (
-    <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">
-        3. Preview Report
-      </h2>
+    <section className="space-y-4 rounded-lg border border-slate-200 bg-white p-5">
+      <div>
+        <h2 className="text-lg font-semibold text-slate-900">Preview Report</h2>
+        <p className="mt-1 text-sm text-slate-500">Final layout before export</p>
+      </div>
 
       <div className="overflow-x-auto rounded-lg border border-slate-200">
-        <table className="min-w-full border-collapse text-sm">
-          <thead className="bg-slate-100">
+        <table className="min-w-full border-collapse text-sm text-slate-700">
+          <thead className="bg-slate-50">
             <tr>
-              <th className="border-b border-slate-200 p-3 text-center font-semibold text-slate-700">
+              <th className="border-b border-slate-200 p-3 text-left font-semibold text-slate-700">
                 Image
               </th>
-              <th className="border-b border-slate-200 p-3 text-center font-semibold text-slate-700">
+              <th className="border-b border-slate-200 p-3 text-left font-semibold text-slate-700">
                 Description
               </th>
             </tr>
@@ -32,14 +34,14 @@ export default function ReportPreview({ title, items }: ReportPreviewProps) {
           <tbody>
             {!hasItems ? (
               <tr>
-                <td colSpan={2} className="p-4 text-center text-slate-500">
+                <td colSpan={2} className="p-6 text-center text-slate-500">
                   Belum ada item report.
                 </td>
               </tr>
             ) : (
               items.map((item) => (
                 <tr key={item.id} className="align-top">
-                  <td className="w-[40%] border-b border-slate-100 p-3">
+                  <td className="w-[35%] border-b border-slate-100 p-4">
                     {item.imagePreviewUrl ? (
                       <Image
                         src={item.imagePreviewUrl}
@@ -47,13 +49,13 @@ export default function ReportPreview({ title, items }: ReportPreviewProps) {
                         width={250}
                         height={160}
                         unoptimized
-                        className="h-auto max-w-[250px] rounded-md border border-slate-200 object-contain"
+                        className="h-auto max-h-[200px] max-w-[250px] rounded-md border border-slate-200 object-contain"
                       />
                     ) : (
                       <p className="text-slate-400">No image</p>
                     )}
                   </td>
-                  <td className="w-[60%] border-b border-slate-100 p-3 text-slate-700">
+                  <td className="w-[65%] border-b border-slate-100 p-4 align-middle leading-6">
                     {item.description || (
                       <span className="text-slate-400">No description</span>
                     )}
@@ -65,10 +67,15 @@ export default function ReportPreview({ title, items }: ReportPreviewProps) {
         </table>
       </div>
 
-      <p className="text-sm text-slate-600">
-        <span className="font-semibold">Title:</span>{" "}
-        {title || "Untitled Daily Report"}
-      </p>
+      <div className="text-sm text-slate-600">
+        <p>
+          <span className="font-semibold">Report Title:</span>{" "}
+          {title || "Untitled Daily Report"}
+        </p>
+        <p>
+          <span className="font-semibold">Generated Date:</span> {generatedDate}
+        </p>
+      </div>
     </section>
   );
 }

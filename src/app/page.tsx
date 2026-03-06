@@ -116,47 +116,53 @@ export default function Home() {
   };
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <header>
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Progress Hub</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Buat daily coding report dengan screenshot, preview, dan export ke PDF atau DOCX.
-        </p>
-      </header>
+    <main className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-6 shadow-lg sm:p-8">
+        <header className="mb-8 border-b border-slate-200 pb-6">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            Progress Hub
+          </h1>
+          <p className="mt-2 text-sm text-slate-500 sm:text-base">
+            Daily Development Report Generator
+          </p>
+        </header>
 
-      <ReportForm
-        title={title}
-        items={items}
-        onTitleChange={setTitle}
-        onAddItem={handleAddItem}
-        onRemoveItem={handleRemoveItem}
-        onImageChange={handleImageChange}
-        onDescriptionChange={handleDescriptionChange}
-      />
+        <div className="space-y-8">
+          <ReportForm
+            title={title}
+            items={items}
+            onTitleChange={setTitle}
+            onAddItem={handleAddItem}
+            onRemoveItem={handleRemoveItem}
+            onImageChange={handleImageChange}
+            onDescriptionChange={handleDescriptionChange}
+          />
 
-      <ReportPreview title={title} items={items} />
+          <ReportPreview title={title} items={items} />
 
-      <section className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">4. Export</h2>
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={handleExportPdf}
-            disabled={!hasExportableContent || isExportingPdf}
-            className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isExportingPdf ? "Exporting PDF..." : "Export PDF"}
-          </button>
-          <button
-            type="button"
-            onClick={handleExportDocx}
-            disabled={!hasExportableContent || isExportingDocx}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isExportingDocx ? "Exporting DOCX..." : "Export DOCX"}
-          </button>
+          <section className="space-y-3 rounded-lg border border-slate-200 bg-white p-5">
+            <h2 className="text-lg font-semibold text-slate-900">Export Report</h2>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleExportPdf}
+                disabled={!hasExportableContent || isExportingPdf}
+                className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isExportingPdf ? "Exporting PDF..." : "Export PDF"}
+              </button>
+              <button
+                type="button"
+                onClick={handleExportDocx}
+                disabled={!hasExportableContent || isExportingDocx}
+                className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isExportingDocx ? "Exporting DOCX..." : "Export DOCX"}
+              </button>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
     </main>
   );
 }
