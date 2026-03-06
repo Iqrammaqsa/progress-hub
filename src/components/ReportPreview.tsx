@@ -16,7 +16,9 @@ export default function ReportPreview({ title, items }: ReportPreviewProps) {
     <section className="space-y-4 rounded-lg border border-slate-200 bg-white p-5">
       <div>
         <h2 className="text-lg font-semibold text-slate-900">Preview Report</h2>
-        <p className="mt-1 text-sm text-slate-500">Final layout before export</p>
+        <p className="mt-1 text-sm text-slate-500">
+          Final layout before export
+        </p>
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-slate-200">
@@ -69,11 +71,11 @@ export default function ReportPreview({ title, items }: ReportPreviewProps) {
 
       <div className="text-sm text-slate-600">
         <p>
-          <span className="font-semibold">Report Title:</span>{" "}
+          <span className="font-semibold">Report:</span>{" "}
           {title || "Untitled Daily Report"}
         </p>
-        <p>
-          <span className="font-semibold">Generated Date:</span> {generatedDate}
+        <p suppressHydrationWarning>
+          <span className="font-semibold"> Date:</span> {generatedDate}
         </p>
       </div>
     </section>
