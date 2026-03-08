@@ -29,6 +29,9 @@ export default function ReportPreview({ title, items }: ReportPreviewProps) {
                 Image
               </th>
               <th className="border-b border-slate-200 p-3 text-left font-semibold text-slate-700">
+                Feature/Page
+              </th>
+              <th className="border-b border-slate-200 p-3 text-left font-semibold text-slate-700">
                 Description
               </th>
             </tr>
@@ -36,7 +39,7 @@ export default function ReportPreview({ title, items }: ReportPreviewProps) {
           <tbody>
             {!hasItems ? (
               <tr>
-                <td colSpan={2} className="p-6 text-center text-slate-500">
+                <td colSpan={3} className="p-6 text-center text-slate-500">
                   Belum ada item report.
                 </td>
               </tr>
@@ -57,7 +60,12 @@ export default function ReportPreview({ title, items }: ReportPreviewProps) {
                       <p className="text-slate-400">No image</p>
                     )}
                   </td>
-                  <td className="w-[65%] border-b border-slate-100 p-4 align-middle leading-6">
+                  <td className="w-[20%] border-b border-slate-100 p-4 align-middle leading-6">
+                    {item.featurePage || (
+                      <span className="text-slate-400">No feature/page</span>
+                    )}
+                  </td>
+                  <td className="w-[45%] border-b border-slate-100 p-4 align-middle leading-6">
                     {item.description || (
                       <span className="text-slate-400">No description</span>
                     )}

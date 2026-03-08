@@ -5,6 +5,7 @@ import type { ReportItemData } from "@/types/report";
 const PAGE_MARGIN = 15;
 const FOOTER_Y_PADDING = 8;
 const IMAGE_COLUMN_RATIO = 0.35;
+const FEATURE_COLUMN_RATIO = 0.2;
 const ROW_MIN_HEIGHT = 34;
 const CELL_PADDING = 3;
 
@@ -60,19 +61,26 @@ const drawTableHeader = (
   doc: jsPDF,
   y: number,
   imageColumnWidth: number,
+  featureColumnWidth: number,
   descriptionColumnWidth: number,
 ) => {
-  const tableWidth = imageColumnWidth + descriptionColumnWidth;
+  const tableWidth = imageColumnWidth + featureColumnWidth + descriptionColumnWidth;
 
   doc.setFillColor(248, 250, 252);
   doc.rect(PAGE_MARGIN, y, tableWidth, 10, "F");
   doc.rect(PAGE_MARGIN, y, imageColumnWidth, 10);
-  doc.rect(PAGE_MARGIN + imageColumnWidth, y, descriptionColumnWidth, 10);
+  doc.rect(PAGE_MARGIN + imageColumnWidth, y, featureColumnWidth, 10);
+  doc.rect(PAGE_MARGIN + imageColumnWidth + featureColumnWidth, y, descriptionColumnWidth, 10);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text("Image", PAGE_MARGIN + CELL_PADDING, y + 6.5);
-  doc.text("Description", PAGE_MARGIN + imageColumnWidth + CELL_PADDING, y + 6.5);
+  doc.text("Feature/Page", PAGE_MARGIN + imageColumnWidth + CELL_PADDING, y + 6.5);
+  doc.text(
+    "Description",
+    PAGE_MARGIN + imageColumnWidth + featureColumnWidth + CELL_PADDING,
+    y + 6.5,
+  );
 };
 
 const addFooterToAllPages = (doc: jsPDF) => {
@@ -98,14 +106,19 @@ export const exportReportToPdf = async (title: string, items: ReportItemData[]) 
   const pageHeight = doc.internal.pageSize.getHeight();
   const tableWidth = pageWidth - PAGE_MARGIN * 2;
   const imageColumnWidth = tableWidth * IMAGE_COLUMN_RATIO;
-  const descriptionColumnWidth = tableWidth - imageColumnWidth;
+  const featureColumnWidth = tableWidth * FEATURE_COLUMN_RATIO;
+  const descriptionColumnWidth = tableWidth - imageColumnWidth - featureColumnWidth;
 
   drawHeader(doc, title);
   let currentY = 42;
-  drawTableHeader(doc, currentY, imageColumnWidth, descriptionColumnWidth);
+  drawTableHeader(doc, currentY, imageColumnWidth, featureColumnWidth, descriptionColumnWidth);
   currentY += 10;
 
   for (const item of items) {
+    const featureText = item.featurePage.trim() || "No feature/page";
+    const featureLines = doc.splitTextToSize(featureText, featureColumnWidth - CELL_PADDING * 2);
+    const featureHeight = featureLines.length * 5 + CELL_PADDING * 2;
+
     const descriptionText = item.description.trim() || "No description";
     const descriptionLines = doc.splitTextToSize(
       descriptionText,
@@ -122,18 +135,29 @@ export const exportReportToPdf = async (title: string, items: ReportItemData[]) 
     const imageBoxHeight = imageData
       ? (imageContentWidth * imageData.height) / imageData.width
       : 0;
-    const rowHeight = Math.max(ROW_MIN_HEIGHT, descriptionHeight, imageBoxHeight + CELL_PADDING * 2);
+    const rowHeight = Math.max(
+      ROW_MIN_HEIGHT,
+      featureHeight,
+      descriptionHeight,
+      imageBoxHeight + CELL_PADDING * 2,
+    );
 
     if (currentY + rowHeight > pageHeight - PAGE_MARGIN - 14) {
       doc.addPage();
       drawHeader(doc, title);
       currentY = 42;
-      drawTableHeader(doc, currentY, imageColumnWidth, descriptionColumnWidth);
+      drawTableHeader(doc, currentY, imageColumnWidth, featureColumnWidth, descriptionColumnWidth);
       currentY += 10;
     }
 
     doc.rect(PAGE_MARGIN, currentY, imageColumnWidth, rowHeight);
-    doc.rect(PAGE_MARGIN + imageColumnWidth, currentY, descriptionColumnWidth, rowHeight);
+    doc.rect(PAGE_MARGIN + imageColumnWidth, currentY, featureColumnWidth, rowHeight);
+    doc.rect(
+      PAGE_MARGIN + imageColumnWidth + featureColumnWidth,
+      currentY,
+      descriptionColumnWidth,
+      rowHeight,
+    );
 
     if (imageData) {
       const maxImageWidth = imageColumnWidth - CELL_PADDING * 2;
@@ -157,9 +181,12 @@ export const exportReportToPdf = async (title: string, items: ReportItemData[]) 
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
+    doc.text(featureLines, PAGE_MARGIN + imageColumnWidth + CELL_PADDING, currentY + 6.5, {
+      maxWidth: featureColumnWidth - CELL_PADDING * 2,
+    });
     doc.text(
       descriptionLines,
-      PAGE_MARGIN + imageColumnWidth + CELL_PADDING,
+      PAGE_MARGIN + imageColumnWidth + featureColumnWidth + CELL_PADDING,
       currentY + 6.5,
       { maxWidth: descriptionColumnWidth - CELL_PADDING * 2 },
     );

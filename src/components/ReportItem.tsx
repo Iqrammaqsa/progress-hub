@@ -9,6 +9,7 @@ type ReportItemProps = {
   item: ReportItemData;
   index: number;
   onImageChange: (id: string, file: File | null) => void;
+  onFeaturePageChange: (id: string, featurePage: string) => void;
   onDescriptionChange: (id: string, description: string) => void;
   onRemove: (id: string) => void;
   canRemove: boolean;
@@ -18,6 +19,7 @@ export default function ReportItem({
   item,
   index,
   onImageChange,
+  onFeaturePageChange,
   onDescriptionChange,
   onRemove,
   canRemove,
@@ -81,7 +83,17 @@ export default function ReportItem({
           ) : null}
         </div>
 
-        <div>
+        <div className="space-y-3">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">Feature/Page</label>
+            <input
+              type="text"
+              value={item.featurePage}
+              onChange={(event) => onFeaturePageChange(item.id, event.target.value)}
+              placeholder="Contoh: Login, Dashboard, Settings"
+              className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
           <label className="mb-2 block text-sm font-medium text-slate-700">Description</label>
           <textarea
             rows={7}

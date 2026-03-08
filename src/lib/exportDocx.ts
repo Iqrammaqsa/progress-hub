@@ -18,7 +18,8 @@ import type { ParagraphChild } from "docx";
 import type { ReportItemData } from "@/types/report";
 
 const IMAGE_COLUMN_PERCENT = 35;
-const DESCRIPTION_COLUMN_PERCENT = 65;
+const FEATURE_COLUMN_PERCENT = 20;
+const DESCRIPTION_COLUMN_PERCENT = 45;
 const IMAGE_MAX_WIDTH = 220;
 const IMAGE_MAX_HEIGHT = 150;
 
@@ -137,6 +138,7 @@ const createBodyCell = (widthPercent: number, children: ParagraphChild[], alignC
   });
 
 const buildItemRow = async (item: ReportItemData) => {
+  const featurePage = item.featurePage.trim() || "No feature/page";
   const description = item.description.trim() || "No description";
 
   let imageChildren: ParagraphChild[];
@@ -158,11 +160,13 @@ const buildItemRow = async (item: ReportItemData) => {
     imageChildren = [new TextRun({ text: "No image", italics: true, color: "6B7280" })];
   }
 
+  const featureChildren = [new TextRun({ text: featurePage, size: 22 })];
   const descriptionChildren = [new TextRun({ text: description, size: 22 })];
 
   return new TableRow({
     children: [
       createBodyCell(IMAGE_COLUMN_PERCENT, imageChildren, true),
+      createBodyCell(FEATURE_COLUMN_PERCENT, featureChildren),
       createBodyCell(DESCRIPTION_COLUMN_PERCENT, descriptionChildren),
     ],
   });
@@ -174,6 +178,7 @@ export const exportReportToDocx = async (title: string, items: ReportItemData[])
     new TableRow({
       children: [
         createHeaderCell("Image", IMAGE_COLUMN_PERCENT),
+        createHeaderCell("Feature/Page", FEATURE_COLUMN_PERCENT),
         createHeaderCell("Description", DESCRIPTION_COLUMN_PERCENT),
       ],
     }),
