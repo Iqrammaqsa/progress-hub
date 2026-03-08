@@ -10,6 +10,7 @@ type ReportFormProps = {
   onAddItem: () => void;
   onRemoveItem: (id: string) => void;
   onImageChange: (id: string, file: File | null) => void;
+  onFeaturePageChange: (id: string, featurePage: string) => void;
   onDescriptionChange: (id: string, description: string) => void;
 };
 
@@ -20,6 +21,7 @@ export default function ReportForm({
   onAddItem,
   onRemoveItem,
   onImageChange,
+  onFeaturePageChange,
   onDescriptionChange,
 }: ReportFormProps) {
   return (
@@ -61,6 +63,7 @@ export default function ReportForm({
               item={item}
               index={index}
               onImageChange={onImageChange}
+              onFeaturePageChange={onFeaturePageChange}
               onDescriptionChange={onDescriptionChange}
               onRemove={onRemoveItem}
               canRemove={items.length > 1}

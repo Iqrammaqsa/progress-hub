@@ -15,6 +15,7 @@ const createItem = (): ReportItemData => ({
       : `${Date.now()}-${Math.random()}`,
   image: null,
   imagePreviewUrl: null,
+  featurePage: "",
   description: "",
 });
 
@@ -89,6 +90,12 @@ export default function Home() {
     );
   };
 
+  const handleFeaturePageChange = (id: string, featurePage: string) => {
+    setItems((previous) =>
+      previous.map((item) => (item.id === id ? { ...item, featurePage } : item)),
+    );
+  };
+
   const handleExportPdf = async () => {
     if (!hasExportableContent) {
       return;
@@ -135,6 +142,7 @@ export default function Home() {
             onAddItem={handleAddItem}
             onRemoveItem={handleRemoveItem}
             onImageChange={handleImageChange}
+            onFeaturePageChange={handleFeaturePageChange}
             onDescriptionChange={handleDescriptionChange}
           />
 
